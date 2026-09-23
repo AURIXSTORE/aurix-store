@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AURIX STORE — System Tuner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Orbitron:wght@500;600;700;800&display=swap');
+:root{--bg:#03050a;--ink:#edf5ff;--muted:#718096;--cyan:#43e8ff;--violet:#9c6cff;--green:#56f5b0;--orange:#ffb65a;--red:#ff607d;--line:rgba(151,176,215,.16)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Kanit,sans-serif}body{overflow-x:hidden;background:radial-gradient(circle at 78% 18%,rgba(67,232,255,.10),transparent 25%),radial-gradient(circle at 45% 100%,rgba(156,108,255,.10),transparent 30%),#03050a}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.23;background-image:linear-gradient(rgba(67,232,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(67,232,255,.035) 1px,transparent 1px);background-size:40px 40px;mask-image:linear-gradient(to bottom,black,transparent 92%)}
+.shell{min-height:100vh;display:grid;grid-template-columns:82px 1fr 285px}.rail{border-right:1px solid var(--line);background:rgba(2,5,10,.86);padding:17px 12px;display:flex;flex-direction:column;align-items:center;position:sticky;top:0;height:100vh;z-index:5}.mark{width:48px;height:48px;border:1px solid rgba(67,232,255,.45);border-radius:15px;display:grid;place-items:center;font:800 18px Orbitron;color:var(--cyan);box-shadow:0 0 30px rgba(67,232,255,.12);margin-bottom:20px}.rail-nav{position:relative;width:54px;height:48px;margin:4px 0;border:1px solid transparent;background:transparent;color:#65748b;border-radius:15px;font-size:16px;cursor:pointer;transition:.2s}.rail-nav:hover{color:#fff;background:rgba(255,255,255,.035)}.rail-nav.active{color:var(--cyan);border-color:rgba(67,232,255,.25);background:linear-gradient(145deg,rgba(67,232,255,.12),rgba(156,108,255,.05))}.rail-nav.active:before{content:"";position:absolute;left:-13px;top:12px;width:2px;height:24px;background:var(--cyan);box-shadow:0 0 13px var(--cyan)}.rail-nav span{display:block;font:6px Orbitron;letter-spacing:.6px;margin-top:2px;white-space:nowrap}.rail .bottom{margin-top:auto;color:#445269;font:8px Orbitron;writing-mode:vertical-rl;letter-spacing:2px}
+.main{padding:26px 30px 45px;min-width:0;max-width:1500px;width:100%;margin:auto}.header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:18px}.path{font:9px Orbitron;letter-spacing:2px;color:#526178}.path b{color:var(--cyan)}.clock{font:10px Orbitron;color:#617188}.hero{padding:32px 0 23px;display:flex;justify-content:space-between;align-items:end;gap:20px}.kicker{font:9px Orbitron;letter-spacing:3px;color:var(--violet);margin-bottom:8px}h1{font:800 34px Orbitron;margin:0;letter-spacing:-1px}.sub{color:#738198;font-size:13px;margin-top:8px}.hero-actions{display:flex;gap:9px;align-items:center}.execute,.apply-all{border-radius:14px;padding:12px 17px;font:600 11px Kanit;cursor:pointer;transition:.2s}.execute{border:1px solid rgba(86,245,176,.38);background:linear-gradient(135deg,rgba(86,245,176,.11),rgba(67,232,255,.05));color:#baffdf}.apply-all{border:1px solid rgba(67,232,255,.42);background:linear-gradient(135deg,rgba(67,232,255,.09),rgba(86,245,176,.06));color:#baffef;font-family:Orbitron;font-size:10px}.execute:hover,.apply-all:hover{box-shadow:0 0 25px rgba(67,232,255,.12);transform:translateY(-1px)}
+.metrics{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;margin-bottom:17px}.metric{min-height:85px;border:1px solid var(--line);background:rgba(10,15,24,.72);border-radius:17px;padding:15px;position:relative;overflow:hidden}.metric:first-child{background:linear-gradient(120deg,rgba(67,232,255,.09),rgba(10,15,24,.7))}.metric:after{content:"";position:absolute;width:110px;height:110px;right:-50px;top:-50px;border-radius:50%;background:rgba(156,108,255,.08);filter:blur(4px)}.metric small{font:8px Orbitron;color:#58677e;letter-spacing:1.4px}.metric strong{display:block;font:700 21px Orbitron;margin-top:7px}.cyan{color:var(--cyan)}.green{color:var(--green)}
+.page{display:none}.page.active-page{display:block}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:14px}.module-wrap{border:1px solid var(--line);border-radius:21px;background:rgba(7,11,18,.62);padding:17px}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.section-title h2{font-size:15px;margin:0}.section-title span{font:8px Orbitron;color:#536177}.modules,.boost-grid,.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card,.boost-card,.info-card{border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,rgba(18,26,40,.76),rgba(7,12,20,.82));padding:16px;transition:.22s;position:relative;overflow:hidden}.card{min-height:139px}.card:before,.boost-card:before{content:"";position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--cyan);transition:.3s;box-shadow:0 0 15px var(--cyan)}.card.on:before,.boost-card.on:before{width:100%}.card:hover,.boost-card:hover,.info-card:hover{transform:translateY(-2px);border-color:rgba(67,232,255,.3)}.cardtop{display:flex;justify-content:space-between;gap:10px}.badge{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(67,232,255,.07);border:1px solid rgba(67,232,255,.13);font-size:16px;flex:none}.name{font-size:14px;font-weight:600;margin-top:1px}.desc{font-size:10px;color:#6d7c92;margin-top:2px;line-height:1.45}.switch{width:44px;height:24px;border-radius:20px;border:1px solid #273447;background:#0d1521;padding:2px;cursor:pointer;flex:none}.knob{display:block;width:18px;height:18px;background:#65758c;border-radius:50%;transition:.2s}.card.on .switch,.boost-card.on .switch{background:rgba(86,245,176,.12);border-color:rgba(86,245,176,.5)}.card.on .knob,.boost-card.on .knob{transform:translateX(18px);background:var(--green);box-shadow:0 0 12px rgba(86,245,176,.6)}.meta{display:flex;justify-content:space-between;margin-top:13px;color:#4e5e75;font:8px Orbitron}.card.on .state,.boost-card.on .state{color:var(--green)}
+.console{border:1px solid var(--line);border-radius:21px;background:rgba(6,10,17,.86);padding:16px;min-height:100%}.console h3{margin:0;font:11px Orbitron;letter-spacing:1.5px}.console .line{height:1px;background:var(--line);margin:13px 0}.log{font:9px ui-monospace,monospace;color:#65748a;line-height:2.05}.log i{font-style:normal;color:var(--cyan)}.log b{color:var(--green);font-weight:400}.wave{height:80px;margin:17px 0;border:1px solid rgba(67,232,255,.12);border-radius:12px;display:flex;align-items:center;gap:3px;padding:12px;overflow:hidden;background:rgba(67,232,255,.025)}.wave span{display:block;width:3px;border-radius:4px;background:linear-gradient(to top,var(--cyan),var(--violet));opacity:.65;animation:pulse 1.2s ease-in-out infinite alternate}@keyframes pulse{to{transform:scaleY(.35);opacity:.28}}
+.boost-card,.info-card{min-height:95px;display:flex;align-items:center;gap:12px}.boost-card .switch{margin-left:auto}.boost-footer{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font:9px Orbitron;color:#58677e}.info-card{flex-direction:column;align-items:flex-start;justify-content:center}.info-card b{font-size:14px}.info-card span{font-size:10px;color:#6d7c92}.toast{position:fixed;right:22px;bottom:22px;padding:12px 15px;border:1px solid rgba(67,232,255,.3);background:#0b1320;border-radius:12px;font-size:11px;opacity:0;transform:translateY(15px);transition:.2s;pointer-events:none;z-index:20}.toast.show{opacity:1;transform:none}
+@media(max-width:1050px){.shell{grid-template-columns:1fr}.rail{position:fixed;left:0;top:0;bottom:0;width:74px}.main{margin-left:74px}.console{display:none}.workspace{display:block}.metrics{grid-template-columns:1fr 1fr 1fr}}@media(max-width:700px){.main{padding:18px;margin-left:0;padding-bottom:90px}.rail{top:auto;bottom:0;left:0;width:100%;height:70px;flex-direction:row;justify-content:center;gap:3px;border-right:0;border-top:1px solid var(--line);padding:7px}.rail .mark,.rail .bottom{display:none}.rail-nav{width:50px;height:54px;margin:0}.rail-nav.active:before{left:13px;top:auto;bottom:-7px;width:24px;height:2px}.hero{align-items:flex-start;gap:16px;flex-direction:column}.hero-actions{width:100%;flex-wrap:wrap}.modules,.boost-grid,.info-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.metrics .metric:first-child{grid-column:span 2}h1{font-size:25px}.boost-footer{gap:10px;flex-direction:column;align-items:flex-start}}
+</style>
+
+<style>
+/* AURIX STORE visual refresh */
+:root{
+  --aurix-glow:rgba(69,233,255,.18);
+  --aurix-panel:rgba(9,14,23,.82);
+}
+body{
+  background:
+    radial-gradient(circle at 78% 8%,rgba(69,233,255,.15),transparent 25%),
+    radial-gradient(circle at 20% 82%,rgba(169,111,255,.10),transparent 30%),
+    radial-gradient(circle at 95% 100%,rgba(255,112,198,.07),transparent 22%),
+    linear-gradient(145deg,#03050a,#070b12 48%,#04060b);
+}
+body:before{
+  opacity:.22;
+  background-size:36px 36px;
+}
+.shell{grid-template-columns:88px minmax(0,1fr)}
+.rail{
+  background:rgba(3,6,11,.82);
+  backdrop-filter:blur(24px);
+  box-shadow:12px 0 45px rgba(0,0,0,.18);
+}
+.mark{
+  border-radius:17px;
+  background:linear-gradient(145deg,rgba(69,233,255,.13),rgba(169,111,255,.07));
+  box-shadow:0 0 34px rgba(69,233,255,.15),inset 0 0 20px rgba(69,233,255,.05);
+}
+.rail-nav{
+  border-radius:17px;
+}
+.rail-nav:hover{
+  border-color:rgba(69,233,255,.18);
+  box-shadow:0 8px 25px rgba(0,0,0,.16);
+}
+.rail-nav.active{
+  box-shadow:0 0 25px rgba(69,233,255,.09),inset 0 0 18px rgba(69,233,255,.04);
+}
+.main{max-width:1600px}
+.header{
+  background:linear-gradient(90deg,rgba(255,255,255,.01),rgba(69,233,255,.025),rgba(255,255,255,.01));
+  border-radius:14px;
+  padding:12px 14px 16px;
+}
+.hero{
+  padding-top:30px;
+}
+.hero h1,#title{
+  text-shadow:0 0 26px rgba(69,233,255,.10);
+}
+.metric,.module-wrap,.console,.card,.boost-card,.info-card{
+  background:linear-gradient(145deg,rgba(15,22,34,.84),rgba(6,11,19,.88));
+  box-shadow:0 16px 45px rgba(0,0,0,.14);
+}
+.metric{
+  border-color:rgba(154,179,223,.16);
+}
+.module-wrap,.console{
+  backdrop-filter:blur(18px);
+}
+.card,.boost-card,.info-card{
+  border-color:rgba(154,179,223,.14);
+}
+.card:after,.boost-card:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(69,233,255,.045),transparent 65%);
+  transform:translateX(-120%);
+  transition:.55s;
+  pointer-events:none;
+}
+.card:hover:after,.boost-card:hover:after{
+  transform:translateX(120%);
+}
+.switch{
+  box-shadow:inset 0 0 10px rgba(0,0,0,.3);
+}
+.toast{
+  backdrop-filter:blur(16px);
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
+}
+@media(max-width:1050px){
+  .shell{grid-template-columns:1fr}
+}
+</style>
+
+
+<style>
+.safe-panel{
+  margin:0 0 16px;
+  border:1px solid rgba(84,239,170,.22);
+  border-radius:18px;
+  padding:13px 15px;
+  background:linear-gradient(135deg,rgba(84,239,170,.055),rgba(69,233,255,.025));
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.safe-title{font:9px Orbitron;color:#8ff8c7;letter-spacing:1.5px}
+.safe-text{font-size:10px;color:#7f8da3;margin-top:3px}
+.safe-pill{
+  white-space:nowrap;padding:7px 10px;border-radius:9px;
+  border:1px solid rgba(84,239,170,.28);
+  color:#b9ffe2;background:rgba(84,239,170,.055);
+  font:8px Orbitron;
+}
+.value-line{
+  margin-top:10px;padding-top:9px;border-top:1px solid rgba(154,179,223,.08);
+  font:8px ui-monospace,monospace;color:#607089;
+}
+.value-line b{color:#a9f7db;font-weight:400}
+.safe-tag{
+  display:inline-block;margin-left:7px;padding:3px 6px;border-radius:6px;
+  font:7px Orbitron;letter-spacing:.5px;color:#8ff8c7;
+  border:1px solid rgba(84,239,170,.22);background:rgba(84,239,170,.04)
+}
+@media(max-width:700px){.safe-panel{align-items:flex-start;flex-direction:column}.safe-pill{align-self:flex-start}}
+</style>
+
+
+<style id="aurix-key-gate-css">
+#keyGate{
+  position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:
+  radial-gradient(circle at 50% 20%,rgba(67,232,255,.12),transparent 32%),
+  radial-gradient(circle at 50% 90%,rgba(156,108,255,.10),transparent 38%),#03050a;
+}
+#keyGate.hidden{display:none}
+#keyGate:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.2;
+  background-image:linear-gradient(rgba(67,232,255,.035) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(67,232,255,.035) 1px,transparent 1px);background-size:40px 40px}
+.key-box{
+  position:relative;width:min(430px,100%);padding:30px;border:1px solid rgba(67,232,255,.25);
+  border-radius:22px;background:linear-gradient(145deg,rgba(12,20,32,.96),rgba(5,9,16,.97));
+  box-shadow:0 25px 90px rgba(0,0,0,.5),0 0 45px rgba(67,232,255,.07);
+  text-align:center;backdrop-filter:blur(18px)
+}
+.key-mark{width:58px;height:58px;margin:0 auto 18px;border:1px solid rgba(67,232,255,.45);
+  border-radius:18px;display:grid;place-items:center;color:#43e8ff;font:800 20px Orbitron;
+  box-shadow:0 0 30px rgba(67,232,255,.12)}
+.key-kicker{font:9px Orbitron;letter-spacing:3px;color:#9c6cff;margin-bottom:8px}
+.key-title{font:800 25px Orbitron;color:#edf5ff}
+.key-sub{font-size:11px;color:#718096;margin:9px 0 22px}
+.key-row{display:flex;gap:9px}
+#keyInput{flex:1;min-width:0;border:1px solid rgba(151,176,215,.18);outline:none;
+  border-radius:12px;background:#080f19;color:#edf5ff;padding:13px 14px;font:11px ui-monospace,monospace}
+#keyInput:focus{border-color:rgba(67,232,255,.5);box-shadow:0 0 20px rgba(67,232,255,.06)}
+#keyBtn{border:1px solid rgba(86,245,176,.4);border-radius:12px;padding:0 17px;
+  background:linear-gradient(135deg,rgba(86,245,176,.12),rgba(67,232,255,.06));
+  color:#baffdf;font:700 10px Orbitron;cursor:pointer}
+#keyBtn:hover{transform:translateY(-1px);box-shadow:0 0 22px rgba(86,245,176,.1)}
+#keyStatus{min-height:18px;margin-top:13px;font-size:10px;color:#718096}
+#keyStatus.ok{color:#56f5b0}#keyStatus.err{color:#ff607d}
+.key-foot{margin-top:18px;font:7px Orbitron;letter-spacing:1px;color:#445269}
+@media(max-width:520px){.key-box{padding:24px}.key-row{flex-direction:column}#keyBtn{height:44px}}
+</style>
+
+</head>
+<body>
+
+<div id="keyGate">
+  <div class="key-box">
+    <div class="key-mark">A</div>
+    <div class="key-kicker">AURIX STORE // ACCESS</div>
+    <div class="key-title">ENTER ACCESS KEY</div>
+    <div class="key-sub">กรุณาใส่ Key เพื่อเข้าสู่ AURIX STORE System Tuner</div>
+    <div class="key-row">
+      <input id="keyInput" type="password" autocomplete="off" spellcheck="false" placeholder="AURIX-XXXX-XXXX">
+      <button id="keyBtn" type="button">UNLOCK</button>
+    </div>
+    <div id="keyStatus">CONNECTING TO KEY SERVER...</div>
+    <div class="key-foot">REMOTE KEY VALIDATION // PASTEBIN</div>
+  </div>
+</div>
+
+<div class="shell">
+<aside class="rail">
+  <div class="mark">A</div>
+  <button class="rail-nav active nav-btn" data-page="home" onclick="showPage('home')">⌂<span>HOME</span></button>
+  <button class="rail-nav nav-btn" data-page="overdrive" onclick="showPage('overdrive')">☄<span>OVERDRIVE</span></button>
+  <button class="rail-nav nav-btn" data-page="boost" onclick="showPage('boost')">⚡<span>BOOST</span></button>
+  <button class="rail-nav nav-btn" data-page="game" onclick="showPage('game')">🎮<span>GAME CORE</span></button>
+  <button class="rail-nav nav-btn" data-page="gpu" onclick="showPage('gpu')">◆<span>GPU TUNER</span></button>
+  <button class="rail-nav nav-btn" data-page="cpu" onclick="showPage('cpu')">◈<span>CPU CORE</span></button>
+  <button class="rail-nav nav-btn" data-page="latency" onclick="showPage('latency')">↯<span>LATENCY</span></button>
+  <button class="rail-nav nav-btn" data-page="clean" onclick="showPage('clean')">◇<span>CLEAN CORE</span></button>
+  <button class="rail-nav nav-btn" data-page="nexus" onclick="showPage('nexus')">✦<span>NEXUS</span></button>
+  <div class="bottom">VOID//CONTROL</div>
+</aside>
+<main class="main">
+  <div class="header"><div class="path">AURIX <b>/</b> STORE <b>/</b> <span style="color:#d8e7ff">SYSTEM TUNER</span></div><div class="clock" id="clock">--:--:--</div></div>
+  <section class="hero">
+    <div><div class="kicker">SYSTEM OVERVIEW</div><h1 id="title">VOID CONTROL</h1><div class="sub" id="subtitle">Cyber Command performance control — เลือกเมนูด้านซ้ายเพื่อเปิดแต่ละศูนย์ปรับแต่ง</div></div>
+    <div class="hero-actions"><button class="apply-all" onclick="applyAll()">✓ APPLY ALL</button><button class="execute" onclick="toast('READY — เลือก Module ที่ต้องการก่อนนำไปผูกคำสั่งจริง')">⚡ EXECUTE CENTER</button></div>
+  </section>
+
+  
+<div class="safe-panel">
+  <div>
+    <div class="safe-title">SAFE BASELINE // REVERSIBLE</div>
+    <div class="safe-text">ชุดนี้เน้นค่าที่ไม่เปลี่ยน kernel / driver tuning และไม่รับประกันว่า FPS หรือ ping จะดีขึ้นทุกเครื่อง</div>
+  </div>
+  <div class="safe-pill">CONSERVATIVE MODE</div>
+</div>
+
+<div id="page-home" class="page active-page">
+    <div class="metrics"><div class="metric"><small>ACTIVE MODULES</small><strong class="green" id="count">0 / 8</strong></div><div class="metric"><small>ENGINE</small><strong class="cyan">ONLINE</strong></div><div class="metric"><small>MODE</small><strong>LOCAL</strong></div></div>
+    <div class="workspace"><section class="module-wrap"><div class="section-title"><h2>Optimization Modules</h2><span>LIVE CONFIGURATION</span></div><div class="modules">
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">⌁</div><div><div class="name">TCP No Delay <span class="safe-tag">LEAVE DEFAULT</span></div><div class="desc">ไม่บังคับค่า registry เพราะผลลัพธ์ขึ้นกับ network stack และเกม</div><div class="value-line">RECOMMENDED: <b>Windows default</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>REG_VALUE</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">➤</div><div><div class="name">TCP ACK Frequency <span class="safe-tag">LEAVE DEFAULT</span></div><div class="desc">ไม่บังคับค่า registry เพื่อหลีกเลี่ยงผลข้างเคียงด้าน TCP</div><div class="value-line">RECOMMENDED: <b>Windows default</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>REG_VALUE</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">◉</div><div><div class="name">Network Throttling <span class="safe-tag">LEAVE DEFAULT</span></div><div class="desc">ไม่ใส่ค่าปลด throttling แบบถาวร เพราะพฤติกรรมต่างกันตาม Windows build</div><div class="value-line">RECOMMENDED: <b>Windows default</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>REG_VALUE</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">◎</div><div><div class="name">DNS Cache Refresh <span class="safe-tag">SAFE</span></div><div class="desc">ล้าง DNS client cache เมื่อแก้ปัญหา name resolution</div><div class="value-line">COMMAND: <b>ipconfig /flushdns</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>COMMAND</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">◇</div><div><div class="name">Gaming Priority <span class="safe-tag">NO REG TWEAK</span></div><div class="desc">ยังไม่บังคับ priority ของ process เพราะอาจทำให้บางเกม/โปรแกรมทำงานต่างกัน</div><div class="value-line">RECOMMENDED: <b>Windows/Game default</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>CUSTOM_REG</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">⌨</div><div><div class="name">Input Response <span class="safe-tag">NO REG TWEAK</span></div><div class="desc">คงค่า mouse/keyboard ของ Windows ไว้เพื่อไม่เปลี่ยนพฤติกรรมการควบคุม</div><div class="value-line">RECOMMENDED: <b>Windows default</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>CUSTOM_REG</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">◫</div><div><div class="name">System Cache <span class="safe-tag">READ ONLY</span></div><div class="desc">ไม่แก้ cache manager registry แบบสุ่ม เพราะไม่มีค่ากลางที่รับประกันว่าดีทุกเครื่อง</div><div class="value-line">RECOMMENDED: <b>Windows managed</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>CUSTOM_REG</span><span class="state">OFF</span></div></div>
+      <div class="card"><div class="cardtop"><div style="display:flex;gap:10px"><div class="badge">⚡</div><div><div class="name">Power Performance <span class="safe-tag">NO REG TWEAK</span></div><div class="desc">ไม่บังคับ power registry; ใช้ Windows power mode ตามงานแทน</div><div class="value-line">RECOMMENDED: <b>Windows managed</b></div></div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="meta"><span>CUSTOM_REG</span><span class="state">OFF</span></div></div>
+    </div></section><aside class="console"><h3>LIVE CONSOLE</h3><div class="line"></div><div class="log" id="log"><div><i>15:22:01</i> engine <b>ready</b></div><div><i>15:22:02</i> modules <b>loaded</b></div><div><i>15:22:03</i> registry <b>standby</b></div><div><i>15:22:04</i> awaiting <b>input...</b></div></div><div class="wave" id="wave"></div><div style="font-size:10px;color:#56657b;line-height:1.7">MODULE STATE<br><span style="color:#aebbd0">Switches are UI-only until you attach your own commands.</span></div></aside></div>
+  </div>
+
+  <div id="page-overdrive" class="page"><div class="metrics"><div class="metric"><small>MODE</small><strong class="green">OVERDRIVE</strong></div><div class="metric"><small>PROFILE</small><strong class="cyan">MAX PERF</strong></div><div class="metric"><small>STATUS</small><strong id="overdriveStatus">READY</strong></div></div><section class="module-wrap"><div class="section-title"><h2>☄ VOID OVERDRIVE</h2><span>MAXIMUM PERFORMANCE</span></div><div class="boost-grid"> <div class="boost-card"><div class="badge">⚡</div><div><div class="name">Performance Profile</div><div class="desc">เตรียมโปรไฟล์สำหรับการใช้งานหนัก</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">◈</div><div><div class="name">Game Focus</div><div class="desc">โฟกัสทรัพยากรไปยังเกม</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">◆</div><div><div class="name">Frame Stability</div><div class="desc">เน้น frame time ที่สม่ำเสมอ</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">✦</div><div><div class="name">Peak Mode</div><div class="desc">โปรไฟล์ UI สำหรับโหมดประสิทธิภาพสูง</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div></div><div class="boost-footer"><span>VOID OVERDRIVE PROFILE</span><button class="apply-all" onclick="applyPageAll('overdrive')">✓ APPLY OVERDRIVE</button></div></section></div>
+
+  <div id="page-boost" class="page"><section class="module-wrap"><div class="section-title"><h2>⚡ VOID BOOST</h2><span>FPS PERFORMANCE CENTER</span></div><div class="boost-grid"><div class="boost-card"><div class="badge">◈</div><div><div class="name">Game Mode</div><div class="desc">เตรียมระบบให้เหมาะกับการเล่นเกม</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">◆</div><div><div class="name">Background Apps</div><div class="desc">ลดงานเบื้องหลังที่ไม่จำเป็น</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">⚡</div><div><div class="name">GPU Performance</div><div class="desc">โปรไฟล์เน้นประสิทธิภาพกราฟิก</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">▣</div><div><div class="name">Fullscreen Optimization</div><div class="desc">ตั้งค่าโหมดการแสดงผลสำหรับเกม</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">◉</div><div><div class="name">Shader Cache</div><div class="desc">จัดการ cache สำหรับ shader</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div><div class="boost-card"><div class="badge">↯</div><div><div class="name">Frame Stability</div><div class="desc">เน้นความสม่ำเสมอของ frame time</div></div><button class="switch" onclick="toggle(this)"><span class="knob"></span></button></div></div><div class="boost-footer"><span>VOID BOOST PROFILE</span><button class="apply-all" onclick="applyPageAll('boost')">✓ APPLY BOOST</button></div></section></div>
+
+  <div id="page-game" class="page"><section class="module-wrap"><div class="section-title"><h2>🎮 GAME CORE</h2><span>GAME OPTIMIZATION</span></div><div class="info-grid"><div class="info-card"><b>Game Focus</b><span>รวมศูนย์การตั้งค่าที่เกี่ยวกับเกม</span></div><div class="info-card"><b>Frame Control</b><span>พื้นที่สำหรับ frame / presentation settings</span></div><div class="info-card"><b>Game Priority</b><span>พื้นที่สำหรับ priority configuration</span></div><div class="info-card"><b>Fullscreen</b><span>พื้นที่สำหรับ display mode tuning</span></div></div></section></div>
+  <div id="page-gpu" class="page"><section class="module-wrap"><div class="section-title"><h2>◆ GPU TUNER</h2><span>GRAPHICS CORE</span></div><div class="info-grid"><div class="info-card"><b>GPU Performance</b><span>พื้นที่สำหรับ GPU performance profile</span></div><div class="info-card"><b>Shader Cache</b><span>พื้นที่สำหรับ shader cache configuration</span></div><div class="info-card"><b>Frame Pacing</b><span>พื้นที่สำหรับ frame stability</span></div><div class="info-card"><b>Render Profile</b><span>พื้นที่สำหรับ graphics profile</span></div></div></section></div>
+  <div id="page-cpu" class="page"><section class="module-wrap"><div class="section-title"><h2>◈ CPU CORE</h2><span>PROCESSOR CENTER</span></div><div class="info-grid"><div class="info-card"><b>CPU Priority</b><span>พื้นที่สำหรับ CPU priority tuning</span></div><div class="info-card"><b>Core Focus</b><span>พื้นที่สำหรับ game core focus</span></div><div class="info-card"><b>Power Profile</b><span>พื้นที่สำหรับ power/performance mode</span></div><div class="info-card"><b>Process Control</b><span>พื้นที่สำหรับ process configuration</span></div></div></section></div>
+  <div id="page-latency" class="page"><section class="module-wrap"><div class="section-title"><h2>↯ LATENCY KILLER</h2><span>LOW LATENCY CENTER</span></div><div class="info-grid"><div class="info-card"><b>Network Latency</b><span>พื้นที่สำหรับ network latency tuning</span></div><div class="info-card"><b>Frame Latency</b><span>พื้นที่สำหรับ frame response tuning</span></div><div class="info-card"><b>TCP / ACK</b><span>พื้นที่สำหรับ TCP configuration</span></div><div class="info-card"><b>Response Profile</b><span>พื้นที่สำหรับ low-latency profile</span></div></div></section></div>
+  <div id="page-clean" class="page"><section class="module-wrap"><div class="section-title"><h2>◇ CLEAN CORE</h2><span>SYSTEM CLEANUP CENTER</span></div><div class="info-grid"><div class="info-card"><b>Background Cleanup</b><span>พื้นที่สำหรับงานเบื้องหลัง</span></div><div class="info-card"><b>Cache Cleanup</b><span>พื้นที่สำหรับ cache maintenance</span></div><div class="info-card"><b>Startup Control</b><span>พื้นที่สำหรับ startup configuration</span></div><div class="info-card"><b>System Cleanup</b><span>พื้นที่สำหรับ system maintenance</span></div></div></section></div>
+  <div id="page-nexus" class="page"><section class="module-wrap"><div class="section-title"><h2>✦ VOID NEXUS</h2><span>CONTROL HUB</span></div><div class="info-grid"><div class="info-card"><b>All Profiles</b><span>รวมโปรไฟล์ทั้งหมดของ VOID//CONTROL</span></div><div class="info-card"><b>Profile Status</b><span>พื้นที่สำหรับสถานะของแต่ละโปรไฟล์</span></div><div class="info-card"><b>Quick Apply</b><span>ศูนย์รวมสำหรับการ Apply</span></div><div class="info-card"><b>Local Engine</b><span>UI พร้อมสำหรับเชื่อมคำสั่งจริงภายหลัง</span></div></div></section></div>
+</main></div>
+<div class="toast" id="toast"></div>
+<script>
+const wave=document.getElementById('wave');if(wave){for(let i=0;i<42;i++){const s=document.createElement('span');s.style.height=(15+Math.random()*48)+'px';s.style.animationDelay=(Math.random()*1.2)+'s';wave.appendChild(s)}}
+function toggle(btn){const card=btn.closest('.card,.boost-card');if(!card)return;const on=card.classList.toggle('on');const state=card.querySelector('.state');if(state)state.textContent=on?'ON':'OFF';updateCount();const name=card.querySelector('.name')?.textContent||'Module';toast((on?'ENABLED  ':'DISABLED  ')+name)}
+function updateCount(){const n=document.querySelectorAll('#page-home .card.on').length;const count=document.getElementById('count');if(count)count.textContent=n+' / 8'}
+function showPage(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page'));const target=document.getElementById('page-'+page);if(target)target.classList.add('active-page');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));const titles={home:'VOID CONTROL',overdrive:'VOID OVERDRIVE',boost:'VOID BOOST',game:'GAME CORE',gpu:'GPU TUNER',cpu:'CPU CORE',latency:'LATENCY KILLER',clean:'CLEAN CORE',nexus:'VOID NEXUS'};document.getElementById('title').textContent=titles[page]||'VOID CONTROL';document.getElementById('subtitle').textContent=page==='home'?'Cyber Command performance control — เลือกเมนูด้านซ้ายเพื่อเปิดแต่ละศูนย์ปรับแต่ง':'VOID//CONTROL — '+(titles[page]||page)+' CENTER';toast('OPENED  '+(titles[page]||page).toUpperCase())}
+function applyAll(){document.querySelectorAll('#page-home .card').forEach(card=>{card.classList.add('on');const state=card.querySelector('.state');if(state)state.textContent='ON'});updateCount();toast('✓ ALL MODULES ENABLED')}
+function applyPageAll(page){document.querySelectorAll('#page-'+page+' .boost-card').forEach(card=>card.classList.add('on'));toast('✓ '+page.toUpperCase()+' PROFILE ENABLED')}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>x.classList.remove('show'),1700)}
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('th-TH',{hour12:false})}tick();setInterval(tick,1000);
+</script>
+
+<script id="aurix-key-gate-js">
+(() => {
+  const KEY_URL = 'https://pastebin.com/raw/793j9wru';
+  const gate = document.getElementById('keyGate');
+  const input = document.getElementById('keyInput');
+  const btn = document.getElementById('keyBtn');
+  const status = document.getElementById('keyStatus');
+  // Fallback keys: this keeps the local HTML usable even when the browser blocks
+  // cross-origin requests to Pastebin (common when opening an .html file directly).
+  // NOTE: client-side keys are not secret; use a server-side validator for real security.
+  const FALLBACK_KEYS = [
+    'AURIX-2026-001',
+    'AURIX-2026-002',
+    'AURIX-2026-003',
+    'AURIX-PREMIUM-X7K2'
+  ];
+  let validKeys = [];
+
+  const setStatus = (msg, type='') => {
+    status.textContent = msg;
+    status.className = type;
+  };
+
+  async function loadKeys(){
+    setStatus('CONNECTING TO KEY SERVER...');
+    try{
+      const res = await fetch(KEY_URL + '?t=' + Date.now(), {
+        method:'GET',
+        cache:'no-store',
+        mode:'cors'
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const text = await res.text();
+      validKeys = text.split(/\r?\n/)
+        .map(x => x.trim())
+        .filter(Boolean)
+        .map(x => x.toUpperCase());
+      if(!validKeys.length) throw new Error('NO_KEYS');
+      setStatus('KEY SERVER ONLINE — ENTER YOUR KEY');
+    }catch(e){
+      // Pastebin may block fetch() from a local file because of CORS.
+      // Fall back to the currently published keys so valid keys still unlock.
+      validKeys = FALLBACK_KEYS.map(x => x.toUpperCase());
+      setStatus('REMOTE OFFLINE — LOCAL KEY LIST READY');
+    }
+  }
+
+  function unlock(){
+    const key = input.value.trim().toUpperCase();
+    if(!key){
+      setStatus('PLEASE ENTER A KEY', 'err');
+      input.focus();
+      return;
+    }
+    if(validKeys.includes(key)){
+      setStatus('ACCESS GRANTED ✓', 'ok');
+      btn.disabled = true;
+      input.disabled = true;
+      setTimeout(() => {
+        gate.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 350);
+    }else{
+      setStatus('INVALID KEY — ACCESS DENIED', 'err');
+      input.select();
+    }
+  }
+
+  btn.addEventListener('click', unlock);
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Enter') unlock();
+  });
+
+  document.body.style.overflow = 'hidden';
+  loadKeys();
+})();
+</script>
+
+</body></html>
